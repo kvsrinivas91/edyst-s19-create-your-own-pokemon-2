@@ -1,6 +1,6 @@
 ## Create your own Pokemon
 
-<h3> This <b>API</b> is used to <b>CREATE , READ , UPDATE , DELETE</b> Pokeman details from a SQLite Database using Flask_SQLAlchemy </h3>  
+<h4> This <b>API</b> is used to <b>CREATE , READ , UPDATE , DELETE</b> Pokeman details from a SQLite Database using Flask_SQLAlchemy </h4>  
 
 # Prerequisites
 
@@ -23,6 +23,9 @@ pip install -r requirements.txt
 
 # Running the Project
      
-* Run the command `python app.py`
+* Run the command 
+``` shell
+python app.py
+```
 * Open the Postman 
 * You can use the CRUD Methods in the Postman and Enjoy it...
