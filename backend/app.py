@@ -82,27 +82,34 @@ def get_pokemon(id):
 @app.route('/api/pokemon/<int:id>',methods=['PATCH'])
 def patch_pokemon(id):
     #Checking Conditions
-    pokemon_id=Pokemon.query.get(id)
-    if pokemon_id==None:
+    pokemon=Pokemon.query.get(id)
+    if pokemon==None:
         return('No Pokemon found with that ID to Update')
     else:
         #Updating the Pokemon Details
-        pokemon=request.get_json()
-        if(len(pokemon['pokemon']['name'])<=0):
-            return('Name is Required')
-        elif(len(pokemon['pokemon']['name'])>50):
-            return('Name should be inbetween 1 and 50')
-        else:
-            pokemon_id.name=pokemon['pokemon']['name']
-        if(len(pokemon['pokemon']['sprite'])<=0):
-            return('Sprite is Required')
-        elif(len(pokemon['pokemon']['sprite'])>200):
-            return('Sprite should be inbetween 1 and 200')
-        else:
-            pokemon_id.sprite=pokemon['pokemon']['sprite']
-        pokemon_id.fg=pokemon['pokemon']['cardColours']['fg']
-        pokemon_id.bg=pokemon['pokemon']['cardColours']['bg']
-        pokemon_id.desc=pokemon['pokemon']['cardColours']['desc']
+        pokemon_data=request.json['pokemon']
+        if 'name'in pokemon_data:
+            if(len(pokemon_data['name'])<=0):
+                return('Name is Required')
+            elif(len(pokemon_data['name'])>50):
+                return('Name should be inbetween 1 and 50')
+            else:
+                pokemon.name=pokemon_data['name']
+        if 'sprite' in pokemon_data:
+            if(len(pokemon_data['sprite'])<=0):
+                return('Sprite is Required')
+            elif(len(pokemon_data['sprite'])>200):
+                return('Sprite should be inbetween 1 and 200')
+            else:
+                pokemon.sprite=pokemon_data['sprite']
+        if 'cardColours' in pokemon_data:
+            cardColours_data=request.json['pokemon']['cardColours']
+            if 'fg' in cardColours_data:
+                pokemon.fg=pokemon_data['cardColours']['fg']
+            if 'bg' in cardColours_data:
+                pokemon.bg=pokemon_data['cardColours']['bg']
+            if 'desc' in cardColours_data:
+                pokemon.desc=pokemon_data['cardColours']['desc']
         db.session.commit()
         #Getting the  updated Pokemon Details
         pokemon=Pokemon.query.filter(Pokemon.id==id).first()
@@ -128,4 +135,4 @@ def delete_pokemon(id):
 #Running Server
 if __name__ == '__main__':
     db.create_all()
-    app.run(host='localhost',port=8006)
+    app.run(host='localhost',port=8006,debug=True)
