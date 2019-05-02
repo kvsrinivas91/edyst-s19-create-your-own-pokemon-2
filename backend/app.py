@@ -1,22 +1,26 @@
-from flask import Flask,request,json,jsonify
+from flask import Flask,request,json,jsonify,render_template
 from flask_sqlalchemy import SQLAlchemy
 import os
 
+#Initializing App
 app=Flask(__name__)
 basedir=os.path.abspath(os.path.dirname(__file__))
 
+#Database
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///'+os.path.join(basedir,'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICAIONS']=False
 
+#Initializing Database
 db=SQLAlchemy(app)
 
+#Pokemon Class
 class Pokemon(db.Model):
     id=db.Column(db.Integer,primary_key=True)
-    name=db.Column(db.String(500),unique=True)
-    sprite=db.Column(db.String,unique=True)
-    fg=db.Column(db.String)
-    bg=db.Column(db.String)
-    desc=db.Column(db.String)
+    name=db.Column(db.String(500),unique=True,nullable=False)
+    sprite=db.Column(db.String,unique=True,nullable=False)
+    fg=db.Column(db.String,nullable=False)
+    bg=db.Column(db.String,nullable=False)
+    desc=db.Column(db.String,nullable=False)
 
     def __init__(self,name,sprite,fg,bg,desc):
         self.name=name
@@ -25,31 +29,103 @@ class Pokemon(db.Model):
         self.bg=bg
         self.desc=desc
 
+#Handling 404 Error
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'),404
+
+#POST Method
 @app.route('/api/pokemon',methods=['POST'])
 def create_pokemon():
-    name=request.json['name']
-    sprite=request.json['sprite']
-    fg=request.json['fg']
-    bg=request.json['bg']
-    desc=request.json['desc']
+    #Taking Input
+    pokemon=request.get_json()
+    #Checking Conditions
+    if(len(pokemon['pokemon']['name'])<=0):
+        return('Name is Required')
+    elif(len(pokemon['pokemon']['name'])>50):
+        return('Name should be inbetween 1 and 50')
+    else:
+        name=pokemon['pokemon']['name']
+    if(len(pokemon['pokemon']['sprite'])<=0):
+        return('Sprite is Required')
+    elif(len(pokemon['pokemon']['sprite'])>200):
+        return('Sprite should be inbetween 1 and 200')
+    else:
+        sprite=pokemon['pokemon']['sprite']
+    fg=pokemon['pokemon']['cardColours']['fg']
+    bg=pokemon['pokemon']['cardColours']['bg']
+    desc=pokemon['pokemon']['cardColours']['desc']
     pokemondata=Pokemon(name,sprite,fg,bg,desc)
+    #Adding new Pokemon
     db.session.add(pokemondata)
     db.session.commit()
-    return get_pokemon(id),201
+    #Getting the Pokemon Details
+    pokemon=Pokemon.query.filter(Pokemon.name==name).first()
+    pokemondata={'pokemon' : {'id' : pokemon.id, 'name' : pokemon.name, 'sprite' : pokemon.sprite, 'cardColours' : {'fg' : pokemon.fg, 'bg' : pokemon.bg, 'desc' : pokemon.desc}}}
+    return jsonify(pokemondata)
+        
+#GET Method
+@app.route('/api/pokemon/<int:id>',methods=['GET'])
+def get_pokemon(id):
+    #Checking Conditions
+    if not id:
+        return('Pokemon ID must be provided')
+    pokemon=Pokemon.query.get(id)
+    if pokemon==None:
+        return('No Pokemon found with that ID')
+    #Getting the Pokemon Details
+    else:
+        pokemondata={'pokemon' : {'id' : pokemon.id, 'name' : pokemon.name, 'sprite' : pokemon.sprite, 'cardColours' : {'fg' : pokemon.fg, 'bg' : pokemon.bg, 'desc' : pokemon.desc}}}
+        return jsonify(pokemondata)
+        
+#PATCH Method
+@app.route('/api/pokemon/<int:id>',methods=['PATCH'])
+def patch_pokemon(id):
+    #Checking Conditions
+    pokemon_id=Pokemon.query.get(id)
+    if pokemon_id==None:
+        return('No Pokemon found with that ID to Update')
+    else:
+        #Updating the Pokemon Details
+        pokemon=request.get_json()
+        if(len(pokemon['pokemon']['name'])<=0):
+            return('Name is Required')
+        elif(len(pokemon['pokemon']['name'])>50):
+            return('Name should be inbetween 1 and 50')
+        else:
+            pokemon_id.name=pokemon['pokemon']['name']
+        if(len(pokemon['pokemon']['sprite'])<=0):
+            return('Sprite is Required')
+        elif(len(pokemon['pokemon']['sprite'])>200):
+            return('Sprite should be inbetween 1 and 200')
+        else:
+            pokemon_id.sprite=pokemon['pokemon']['sprite']
+        pokemon_id.fg=pokemon['pokemon']['cardColours']['fg']
+        pokemon_id.bg=pokemon['pokemon']['cardColours']['bg']
+        pokemon_id.desc=pokemon['pokemon']['cardColours']['desc']
+        db.session.commit()
+        #Getting the  updated Pokemon Details
+        pokemon=Pokemon.query.filter(Pokemon.id==id).first()
+        pokemondata={'pokemon' : {'id' : pokemon.id, 'name' : pokemon.name, 'sprite' : pokemon.sprite, 'cardColours' : {'fg' : pokemon.fg, 'bg' : pokemon.bg, 'desc' : pokemon.desc}}}
+        return jsonify(pokemondata)
 
-@app.route("/api/pokemon/<int:id>")
-def get_pokemon(id) : 
-    result = pokemon.query.filter(Pokemon.id == id).first()
-    data={}
-    data['pokemon'] = {}
-    data['pokemon']['id']=result.id
-    data['pokemon']['name']=result.name
-    data['pokemon']['sprite']=result.sprite
-    data['pokemon']['cardColours']={}
-    data['pokemon']['cardColours']['fg']=result.fg
-    data['pokemon']['cardColours']['bg']=result.bg
-    data['pokemon']['cardColours']['desc']=result.desc
-    return jsonify(data)
+#DELETE Method
+@app.route('/api/pokemon/<int:id>',methods=['DELETE'])
+def delete_pokemon(id):
+    #Checking Conditions
+    pokemon=Pokemon.query.get(id)
+    if pokemon==None:
+        return('No Pokemon found with that ID to Delete')
+    else:
+        pokemon=Pokemon.query.filter(Pokemon.id==id).first()
+        pokemondata={'pokemon' : {'id' : pokemon.id, 'name' : pokemon.name, 'sprite' : pokemon.sprite, 'cardColours' : {'fg' : pokemon.fg, 'bg' : pokemon.bg, 'desc' : pokemon.desc}}}
+        #Deleting the Pokemon Details
+        db.session.delete(pokemon)
+        db.session.commit()
+        #Getting the deleted Pokemon Details
+        return jsonify(pokemondata)
 
+#Running Server
 if __name__ == '__main__':
-    app.run(host='localhost',port=8006,debug=True)
+    db.create_all()
+    app.run(host='localhost',port=8006)
