@@ -4,7 +4,7 @@
 
 # Prerequisites
 
-Make sure that you have installed the following in your Host Machine
+Make sure that you have installed the following into your Host Machine
 * Python
 * Postman 
 
