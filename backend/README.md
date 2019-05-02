@@ -10,7 +10,7 @@ Make sure that you have installed the following in your Host Machine
 
 # Setting up the Project Environemnt
 
-* [Clone](https://github.com/venkatpantham/edyst-s19-create-your-own-pokemon.git) this repo in your host machine.
+* [Clone](https://github.com/venkatpantham/edyst-s19-create-your-own-pokemon.git) this repo into your host machine.
 * cd ⁨`edyst-s19-create-your-own-pokemon\backend`
 * Setup a virtual environment
 ``` shell
