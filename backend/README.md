@@ -28,4 +28,4 @@ pip install -r requirements.txt
 python app.py
 ```
 * Open the Postman 
-* You can use the CRUD Methods in the Postman and Enjoy it...
+* You can perform the CRUD Methods in the Postman and understand the API.
