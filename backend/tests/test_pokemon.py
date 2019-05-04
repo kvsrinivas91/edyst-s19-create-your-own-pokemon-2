@@ -1,4 +1,4 @@
-import unittest, os
+import unittest
 from app import db, app, Pokemon
 
 class PokemonTest(unittest.TestCase):
