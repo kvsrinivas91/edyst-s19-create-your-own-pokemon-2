@@ -1,8 +1,11 @@
-import unittest
+import unittest, sys
+
+sys.path.append("../")
+
 from app import db, Pokemon
 
+
 class PokemonTest(unittest.TestCase):
-    
     def setUp(self):
         db.create_all()
 
@@ -121,5 +124,7 @@ class PokemonTest(unittest.TestCase):
         )
         print("######  Testing Pokemon Deletion is SUCCESS  ######")
         db.drop_all()
+
+
 if __name__ == "__main__":
     unittest.main()
