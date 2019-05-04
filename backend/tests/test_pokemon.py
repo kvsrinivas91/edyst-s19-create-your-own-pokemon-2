@@ -6,8 +6,14 @@ from app import db, Pokemon
 
 
 class PokemonTest(unittest.TestCase):
-    def setUp(self):
+    
+    @classmethod
+    def setUpClass(self):
         db.create_all()
+    
+    @classmethod   
+    def tearDownClass(self):
+        db.drop_all()
 
     def test_pokemon_create(self):
         print("######  Testing Pokemon Creation ######")
@@ -45,7 +51,7 @@ class PokemonTest(unittest.TestCase):
         self.assertEqual(pokemon, pokemondata)
         print("######  Testing Pokemon Creation is SUCCESS  ######")
 
-    def test_pokemon_get(self):
+    def test_pokemon_fetch(self):
         print("######  Testing Pokemon Existance  ######")
         pokemon = {
             "pokemon": {
@@ -82,19 +88,17 @@ class PokemonTest(unittest.TestCase):
                 "cardColours": {"fg": "#eeeeee", "bg": "#3e3e3e", "desc": "#111111"},
             }
         }
-        pokemon_data = (
-            db.session.query(Pokemon).filter(Pokemon.name == "Test Pokemon").first()
-        )
-        db.session.add(
-            Pokemon(
-                name=pokemon["pokemon"]["name"],
-                sprite=pokemon["pokemon"]["sprite"],
-                fg=pokemon["pokemon"]["cardColours"]["fg"],
-                bg=pokemon["pokemon"]["cardColours"]["bg"],
-                desc=pokemon["pokemon"]["cardColours"]["desc"],
+        if(db.session.query(Pokemon).filter(Pokemon.name == "Test Pokemon").first() is not None):
+            db.session.add(
+                Pokemon(
+                    name=pokemon["pokemon"]["name"],
+                    sprite=pokemon["pokemon"]["sprite"],
+                    fg=pokemon["pokemon"]["cardColours"]["fg"],
+                    bg=pokemon["pokemon"]["cardColours"]["bg"],
+                    desc=pokemon["pokemon"]["cardColours"]["desc"],
+                )
             )
-        )
-        db.session.commit()
+            db.session.commit()
         pokemon_data = (
             db.session.query(Pokemon).filter(Pokemon.name == "New Pokemon").first()
         )
@@ -123,8 +127,6 @@ class PokemonTest(unittest.TestCase):
             db.session.query(Pokemon).filter(Pokemon.name == "New Pokemon").first()
         )
         print("######  Testing Pokemon Deletion is SUCCESS  ######")
-        db.drop_all()
-
 
 if __name__ == "__main__":
     unittest.main()
