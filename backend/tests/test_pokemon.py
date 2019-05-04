@@ -1,5 +1,5 @@
 import unittest
-from app import db, app, Pokemon
+from app import db, Pokemon
 
 class PokemonTest(unittest.TestCase):
     
