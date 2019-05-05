@@ -81,10 +81,10 @@ def create_pokemon():
 def get_pokemon(id):
     # Checking Conditions
     if not id:
-        return "Pokemon ID must be provided"
+        return ("Pokemon ID must be provided"),404
     pokemon = Pokemon.query.get(id)
     if pokemon == None:
-        return "No Pokemon found with that ID"
+        return ("No Pokemon found with that ID"),404
     # Getting the Pokemon Details
     else:
         pokemondata = {
@@ -108,15 +108,15 @@ def patch_pokemon(id):
     # Checking Conditions
     pokemon = Pokemon.query.get(id)
     if pokemon == None:
-        return "No Pokemon found with that ID to Update"
+        return ("No Pokemon found with that ID to Update"),404
     else:
         # Updating the Pokemon Details
         pokemon_data = request.json["pokemon"]
         if "name" in pokemon_data:
             if len(pokemon_data["name"]) <= 0:
-                return "Name is Required"
+                return ("Name is Required"),404
             elif len(pokemon_data["name"]) > 50:
-                return "Name should be inbetween 1 and 50"
+                return( "Name should be inbetween 1 and 50"),404
             else:
                 pokemon.name = pokemon_data["name"]
         if "sprite" in pokemon_data:
@@ -158,7 +158,7 @@ def delete_pokemon(id):
     # Checking Conditions
     pokemon = Pokemon.query.get(id)
     if pokemon == None:
-        return "No Pokemon found with that ID to Delete"
+        return ("No Pokemon found with that ID to Delete"),404
     else:
         pokemon = Pokemon.query.filter(Pokemon.id == id).first()
         pokemondata = {
